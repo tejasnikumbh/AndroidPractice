@@ -1,0 +1,155 @@
+package com.example.maplocationfromcontacts;
+
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBar;
+import android.support.v4.app.Fragment;
+import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.os.Build;
+import android.provider.ContactsContract;
+
+public class MainActivity extends ActionBarActivity {
+	// Some instance variables
+	
+	private static final String DATA_MIMETYPE = ContactsContract.Data.MIMETYPE;
+	private static final String DATA_CONTACT_ID = ContactsContract.Data.CONTACT_ID;
+	private static final Uri DATA_CONTENT_URI = ContactsContract.Data.CONTENT_URI;
+	
+	private static final String CONTACTS_ID = ContactsContract.Contacts._ID;
+	private static final Uri CONTACTS_CONTENT_URI = ContactsContract.Contacts.CONTENT_URI;
+	
+	private static final String STRUCTURED_POSTAL_CONTENT_ITEM_TYPE
+					= ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_ITEM_TYPE;
+	private static final String STRUCTURED_POSTAL_CONTENT_FORMATTED_ADDRESS
+	 				= ContactsContract.CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS;
+	private static final int PICK_CONTACT_REQUEST = 0;
+	private static final String TAG = "MapLocation";
+	
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+    	// Restoring the saved state
+        super.onCreate(savedInstanceState);
+        
+        // Setting the content view
+        setContentView(R.layout.activity_main);
+        
+        // Gettting references to view elements
+        Button mapButton = (Button) findViewById(R.id.map_button);
+        
+        // Configuring the listener
+        mapButton.setOnClickListener(new View.OnClickListener() {
+        	
+			@Override
+			public void onClick(View v) {
+				
+				// Creating an intent to start the Contact Picker activity for result
+				Intent pickContact = new Intent(android.content.Intent.ACTION_PICK,
+									 CONTACTS_CONTENT_URI);
+				
+				// Starting the contact picker activity
+				startActivityForResult(pickContact,PICK_CONTACT_REQUEST);
+			}
+		});
+    }
+    
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+    	
+    	// Checking if the result returned is for the relevant request and if result is OK
+    	if(requestCode == PICK_CONTACT_REQUEST 
+    			&& resultCode == Activity.RESULT_OK){
+    		
+    		// Getting data from the resulting pick action. [Note that we can only retrieve id]
+    		ContentResolver cr = getContentResolver();
+    		Cursor cursor = cr.query(data.getData(),null, null, null,null);
+    		
+    		// If the cursor is not null nor empty [has a record]
+    		if(cursor!=null && cursor.moveToFirst()){
+    			// Retrieving the id from the resulting Intent after picking was done
+    			String id = cursor.getString(cursor.getColumnIndex(CONTACTS_ID));
+    			
+    			// Constructing a where clause to select the row corresponding to the Contact ID picked
+    			// We choose the row with the given contact id and DATAMIMETYPE as postal since
+    			// there can be many rows with the given contact id.
+    			String where = DATA_CONTACT_ID + " = ? AND " + DATA_MIMETYPE + " = ?";
+    			String[] whereParams = {id,STRUCTURED_POSTAL_CONTENT_ITEM_TYPE}; 
+    			
+    			Cursor addrCur = cr.query(DATA_CONTENT_URI,null, where, whereParams,null);
+    			
+    			if(null!=addrCur 
+    					&& addrCur.moveToFirst()){
+    					
+    				// Extracting formatted address from the row
+    				String formattedAddress = addrCur.getString(addrCur.getColumnIndex(
+    										  STRUCTURED_POSTAL_CONTENT_FORMATTED_ADDRESS));
+    				
+    				// Starting the Maps activity in case formatted address has been provided.
+    				if(null != formattedAddress){
+    					formattedAddress = formattedAddress.replace(' ' , '+');
+    					Intent geoIntent =  new Intent(android.content.Intent.ACTION_VIEW,
+    										Uri.parse("geo:0,0?q=" + formattedAddress));
+    					startActivity(geoIntent);
+    				}
+    				
+    			}
+    			
+    			// Closing the iterating cursor
+    			if(null != addrCur){
+    				addrCur.close();
+    			}
+    		}
+    		
+    		// Closing the iterating cursor
+    		if(cursor!=null){
+    			cursor.close();
+    		}
+    	}
+    	
+    }
+
+    @Override
+    protected void onStart(){
+    	super.onStart();
+    	Log.i(TAG, "Starting visible only behavior. Loading any persistent state.");
+    }
+    
+    @Override
+    protected void onRestart(){
+    	super.onRestart();
+    	Log.i(TAG,"Doing any after stopping special processing");
+    }
+    
+    @Override
+    protected void onResume(){
+    	super.onResume();
+    	Log.i(TAG,"Starting foreground only behavior");
+    }
+    
+    @Override
+    protected void onPause(){
+    	super.onPause();
+    	Log.i(TAG,"Stopping foreground only behavior. Save persistent state. Caching state if any and freeing resources.");
+    }
+    
+    @Override
+    protected void onStop(){
+    	super.onStop();
+    	Log.i(TAG,"Stopping visible only behavior. Caching state if not already done");
+    }
+    
+    @Override
+    protected void onDestroy(){
+    	Log.i(TAG,"Destroying the activity. Freeing resourcces if not already done.");
+    }
+}

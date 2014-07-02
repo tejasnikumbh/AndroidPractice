@@ -1,0 +1,55 @@
+package com.example.maplocationfromcontacts;
+
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBar;
+import android.support.v4.app.Fragment;
+import android.net.Uri;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.os.Build;
+import android.provider.ContactsContract;
+
+public class MainActivity extends ActionBarActivity {
+	// Some instance variables
+	
+	private static final String DATA_MIMETYPE = ContactsContract.Data.MIMETYPE;
+	private static final String DATA_CONTACT_ID = ContactsContract.Data.CONTACT_ID;
+	private static final Uri DATA_CONTENT_URI = ContactsContract.Data.CONTENT_URI;
+	
+	private static final String CONTACTS_ID = ContactsContract.Contacts._ID;
+	private static final Uri CONTACTS_CONTENT_URI = ContactsContract.Contacts.CONTENT_URI;
+	
+	private static final String STRUCTURED_POSTAL_CONTENT_ITEM_TYPE
+					= ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_ITEM_TYPE;
+	private static final String STRUCTURED_POSTAL_CONTENT_FORMATTED_ADDRESS
+	 				= ContactsContract.CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS;
+	private static final int PICK_CONTACT_REQUEST = 0;
+	private static final String TAG = "MapLocation";
+	
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+    	// Restoring the saved state
+        super.onCreate(savedInstanceState);
+        
+        // Setting the content view
+        setContentView(R.layout.activity_main);
+        
+        // Gettting references to view elements
+        Button mapButton = (Button) findViewById(R.id.map_button);
+        
+        // Configuring the listener
+        mapButton.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				
+			}
+		});
+    }
+
+}
