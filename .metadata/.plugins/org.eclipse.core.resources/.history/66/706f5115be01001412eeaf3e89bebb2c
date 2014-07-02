@@ -150,7 +150,6 @@ public class MainActivity extends ActionBarActivity {
     
     @Override
     protected void onDestroy(){
-    	super.onDestroy();
     	Log.i(TAG,"Destroying the activity. Freeing resourcces if not already done.");
     }
 }
