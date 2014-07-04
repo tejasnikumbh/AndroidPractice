@@ -1,7 +1,7 @@
 AndroidPractice
 ===============
 
-Code Repository for Android Related Code. Most of this code is related to Coursera's Android Class.
+Code Repository for Android Related Code. 
 * Week 1
   - HelloAndroid
     * A simple android app analogous to the Hello World App with welcome text changed.
